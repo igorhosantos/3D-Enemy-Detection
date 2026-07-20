@@ -46,14 +46,14 @@ namespace EnemyDetection.DataStructures
                     throw new ArgumentOutOfRangeException();
                 var current = _root;
                 for (var i = 0; i < key; i++)
-                    current = current.next;
-                return current.component;
+                    current = current.Next;
+                return current.Component;
             }
         }
         
         public void Add(T item)
         {
-            _add(new KdNode() { component = item });
+            Add(new KdNode() { Component = item });
         }
         
         public void Clear()
@@ -73,8 +73,8 @@ namespace EnemyDetection.DataStructures
             var current = _root;
             while (current != null)
             {
-                current._oldRef = current.next;
-                current = current.next;
+                current.OldRef = current.Next;
+                current = current.Next;
             }
 
             //save root
@@ -86,8 +86,8 @@ namespace EnemyDetection.DataStructures
             //readd
             while (current != null)
             {
-                _add(current);
-                current = current._oldRef;
+                Add(current);
+                current = current.OldRef;
             }
         }
 
@@ -100,8 +100,8 @@ namespace EnemyDetection.DataStructures
             var current = _root;
             while (current != null)
             {
-                yield return current.component;
-                current = current.next;
+                yield return current.Component;
+                current = current.Next;
             }
         }
         
@@ -113,33 +113,33 @@ namespace EnemyDetection.DataStructures
             return GetEnumerator();
         }
 
-        protected float _distance(Vector3 a, Vector3 b)
+        protected float CalculatedDistance(Vector3 a, Vector3 b)
         {
             if (_just2D)
                 return (a.x - b.x) * (a.x - b.x) + (a.z - b.z) * (a.z - b.z);
-            else
-                return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z);
+           
+            return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z);
         }
 
-        protected float _getSplitValue(int level, Vector3 position)
+        protected float GetSplitValue(int level, Vector3 position)
         {
             if (_just2D)
                 return (level % 2 == 0) ? position.x : position.z;
-            else
-                return (level % 3 == 0) ? position.x : (level % 3 == 1) ? position.y : position.z;
+               
+            return (level % 3 == 0) ? position.x : (level % 3 == 1) ? position.y : position.z;
         }
 
-        private void _add(KdNode newNode)
+        private void Add(KdNode newNode)
         {
             _count++;
-            newNode.left = null;
-            newNode.right = null;
-            newNode.level = 0;
-            var parent = _findParent(newNode.component.transform.position);
+            newNode.Left = null;
+            newNode.Right = null;
+            newNode.Level = 0;
+            var parent = _findParent(newNode.Component.transform.position);
 
             //set last
             if (_last != null)
-                _last.next = newNode;
+                _last.Next = newNode;
             _last = newNode;
 
             //set root
@@ -149,15 +149,15 @@ namespace EnemyDetection.DataStructures
                 return;
             }
 
-            var splitParent = _getSplitValue(parent);
-            var splitNew = _getSplitValue(parent.level, newNode.component.transform.position);
+            var splitParent = GetSplitValue(parent);
+            var splitNew = GetSplitValue(parent.Level, newNode.Component.transform.position);
 
-            newNode.level = parent.level + 1;
+            newNode.Level = parent.Level + 1;
 
             if (splitNew < splitParent)
-                parent.left = newNode; //go left
+                parent.Left = newNode; //go left
             else
-                parent.right = newNode; //go right
+                parent.Right = newNode; //go right
         }
 
         private KdNode _findParent(Vector3 position)
@@ -167,14 +167,14 @@ namespace EnemyDetection.DataStructures
             var parent = _root;
             while (current != null)
             {
-                var splitCurrent = _getSplitValue(current);
-                var splitSearch = _getSplitValue(current.level, position);
+                var splitCurrent = GetSplitValue(current);
+                var splitSearch = GetSplitValue(current.Level, position);
 
                 parent = current;
                 if (splitSearch < splitCurrent)
-                    current = current.left; //go left
+                    current = current.Left; //go left
                 else
-                    current = current.right; //go right
+                    current = current.Right; //go right
 
             }
 
@@ -214,55 +214,55 @@ namespace EnemyDetection.DataStructures
             {
                 var current = _open[openCur++];
                 if (traversed != null)
-                    traversed.Add(current.component);
+                    traversed.Add(current.Component);
 
-                var nodeDist = _distance(position, current.component.transform.position);
+                var nodeDist = CalculatedDistance(position, current.Component.transform.position);
                 if (nodeDist < nearestDist && nodeDist != 0)
                 {
                     nearestDist = nodeDist;
                     nearest = current;
                 }
 
-                var splitCurrent = _getSplitValue(current);
-                var splitSearch = _getSplitValue(current.level, position);
+                var splitCurrent = GetSplitValue(current);
+                var splitSearch = GetSplitValue(current.Level, position);
 
                 if (splitSearch < splitCurrent)
                 {
-                    if (current.left != null)
-                        _open[openAdd++] = current.left; //go left
+                    if (current.Left != null)
+                        _open[openAdd++] = current.Left; //go left
                     if (Mathf.Abs(splitCurrent - splitSearch) * Mathf.Abs(splitCurrent - splitSearch) < nearestDist &&
-                        current.right != null)
-                        _open[openAdd++] = current.right; //go right
+                        current.Right != null)
+                        _open[openAdd++] = current.Right; //go right
                 }
                 else
                 {
-                    if (current.right != null)
-                        _open[openAdd++] = current.right; //go right
+                    if (current.Right != null)
+                        _open[openAdd++] = current.Right; //go right
                     if (Mathf.Abs(splitCurrent - splitSearch) * Mathf.Abs(splitCurrent - splitSearch) < nearestDist &&
-                        current.left != null)
-                        _open[openAdd++] = current.left; //go left
+                        current.Left != null)
+                        _open[openAdd++] = current.Left; //go left
                 }
             }
 
             AverageSearchLength = (99f * AverageSearchLength + openCur) / 100f;
-            AverageSearchDeep = (99f * AverageSearchDeep + nearest.level) / 100f;
+            AverageSearchDeep = (99f * AverageSearchDeep + nearest.Level) / 100f;
 
-            return nearest.component;
+            return nearest.Component;
         }
 
-        private float _getSplitValue(KdNode node)
+        private float GetSplitValue(KdNode node)
         {
-            return _getSplitValue(node.level, node.component.transform.position);
+            return GetSplitValue(node.Level, node.Component.transform.position);
         }
 
         protected class KdNode
         {
-            internal T component;
-            internal int level;
-            internal KdNode left;
-            internal KdNode right;
-            internal KdNode next;
-            internal KdNode _oldRef;
+            internal T Component;
+            internal int Level;
+            internal KdNode Left;
+            internal KdNode Right;
+            internal KdNode Next;
+            internal KdNode OldRef;
         }
     }
 }
