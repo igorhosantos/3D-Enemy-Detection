@@ -6,6 +6,13 @@ using UnityEngine;
 
 namespace EnemyDetection.DataStructures
 {
+    /// <summary>
+    /// A K-Dimensional Tree (also known as K-D Tree) is a space-partitioning
+    /// data structure for organizing points in a K-Dimensional space.
+    /// This data structure acts similar to a binary search tree with each node representing
+    /// data in the multidimensional space.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class KdTree<T> : IEnumerable<T>, IEnumerable where T : Component
     {
         protected KdNode _root;
@@ -43,29 +50,20 @@ namespace EnemyDetection.DataStructures
                 return current.component;
             }
         }
-
-        /// <summary>
-        /// add item
-        /// </summary>
-        /// <param name="item">item</param>
+        
         public void Add(T item)
         {
             _add(new KdNode() { component = item });
         }
-
-        /// <summary>
-        /// clear tree
-        /// </summary>
+        
         public void Clear()
         {
-
             //rest for the garbage collection
             _root = null;
             _last = null;
             _count = 0;
         }
-
-
+        
         /// <summary>
         /// Update positions (if objects moved)
         /// </summary>
@@ -106,8 +104,7 @@ namespace EnemyDetection.DataStructures
                 current = current.next;
             }
         }
-
-
+        
         /// <summary>
         /// Method to enable foreach-loops
         /// </summary>
@@ -185,16 +182,16 @@ namespace EnemyDetection.DataStructures
         }
 
         /// <summary>
-        /// Find closest object to given position
+        /// Find closer object to given position
         /// </summary>
         /// <param name="position">position</param>
         /// <returns>closest object</returns>
-        public T FindClosest(Vector3 position)
+        public T FindCloserObject(Vector3 position)
         {
-            return _findClosest(position);
+            return FindLocalCloserObject(position);
         }
 
-        protected T _findClosest(Vector3 position, List<T> traversed = null)
+        private T FindLocalCloserObject(Vector3 position, List<T> traversed = null)
         {
             if (_root == null)
                 return null;

@@ -1,15 +1,15 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Utils.ObjectPooling
 {
     
     public class ObjectPoolingMonoBehaviour : MonoBehaviour
     {
-
         [SerializeField] private int minimumForPool;
-        [SerializeField] private Dictionary<string, GameObject> prefabTypes;
-        [SerializeField] private GameObject prefab;
+        [SerializeField] private List<GameObject> prefabTypes;
         [SerializeField] private Transform containerPool;
         private readonly List<GameObject> pool = new List<GameObject>();
 
@@ -41,9 +41,21 @@ namespace Utils.ObjectPooling
 
         private void AddElementOnThePool()
         {
-            var newItem = containerPool != null ? Instantiate(prefab, containerPool.transform) : Instantiate(prefab);
-            newItem.gameObject.SetActive(false);
-            pool.Add(newItem);
+            try
+            {
+                //get a random type to add on the pool
+                int randomIndex = Random.Range(0, prefabTypes.Count);
+                GameObject prefab = prefabTypes[randomIndex];
+            
+                var newItem = containerPool != null ? Instantiate(prefab, containerPool.transform) : Instantiate(prefab);
+                newItem.gameObject.SetActive(false);
+                pool.Add(newItem);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error during add element on the pool: {e}");
+            }
+          
         }
 
         public GameObject GetObjectInThePool()

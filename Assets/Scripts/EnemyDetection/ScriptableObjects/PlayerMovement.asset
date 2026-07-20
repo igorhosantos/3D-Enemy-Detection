@@ -20,7 +20,7 @@ MonoBehaviour:
       Min: 0
       Max: 0
     zPosition:
-      Min: -10
-      Max: 10
+      Min: 0
+      Max: 20
     speedMovement: 0.5
     distance: 1

@@ -8,7 +8,7 @@ namespace EnemyDetection.Behaviours
     {
         public PlayerController GetNext(KdTree<PlayerController> players)
         {
-            return players.FindClosest(transform.position);
+            return players.FindCloserObject(transform.position);
         }
     }
 }
